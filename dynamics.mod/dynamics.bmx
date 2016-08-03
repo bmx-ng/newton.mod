@@ -161,6 +161,15 @@ Type TNWorld
 	End Method
 	
 	Rem
+	bbdoc: 
+	End Rem
+	Method CreateMesh:TNMesh()
+		Local mesh:TNMesh = New TNMesh
+		mesh.meshPtr = NewtonMeshCreate(worldPtr)
+		Return mesh
+	End Method
+	
+	Rem
 	bbdoc: Sets coulomb model of friction.
 	about: Allows the application to chose between and exact or an adaptive coulomb friction model.
  
@@ -571,6 +580,54 @@ Type TNBody
 		NewtonBodySetLinearDamping(bodyPtr, linearDamp)
 	End Method
 	
+	Rem
+	bbdoc: Returns the body type.
+	about: Returns one of NEWTON_DYNAMIC_BODY, NEWTON_KINEMATIC_BODY or NEWTON_DEFORMABLE_BODY.
+	End Rem
+	Method GetType:Int()
+		Return NewtonBodyGetType(bodyPtr)
+	End Method
+	
+	Rem
+	bbdoc: Returns true if the body is collidable.
+	End Rem
+	Method GetCollidable:Int()
+		Return NewtonBodyGetCollidable(bodyPtr)
+	End Method
+	
+	Rem
+	bbdoc: Sets the collidable state for the body.
+	End Rem
+	Method SetCollidable(collidableState:Int)
+		NewtonBodySetCollidable(bodyPtr, collidableState)
+	End Method
+	
+	Rem
+	bbdoc: Adds the net force applied to a rigid body.
+	about: This method is only effective when called from OnForceAndTorque/apply force and torque callback.
+	End Rem
+	Method AddForce(fx:Float, fy:Float, fz:Float)
+		bmx_newtondynamics_NewtonBodyAddForce(bodyPtr, fx, fy, fz)
+	End Method
+	
+	Rem
+	bbdoc: Adds the net torque applied to a rigid body.
+	about: This method is only effective when called from OnForceAndTorque/apply force and torque callback.
+	End Rem
+	Method AddTorque(tx:Float, ty:Float, tz:Float)
+		bmx_newtondynamics_NewtonBodyAddTorque(bodyPtr, tx, ty, tz)
+	End Method
+	
+	Rem
+	bbdoc: Calculates the next force that net to be applied to the body to archive the desired velocity in the current time step.
+	about: Can be useful when creating object for game play.
+	This treats the body as a point mass and is uses the solver to calculates the net force that need to be applied to the body
+	such that it reaches the desired velocity in the net time step.
+	End Rem
+	Method CalculateInverseDynamicsForce(timestep:Float, vx:Float, vy:Float, vz:Float, fx:Float Var, fy:Float Var, fz:Float Var)
+		bmx_newtondynamics_NewtonBodyCalculateInverseDynamicsForce(bodyPtr, timestep, vx, vy, vz, Varptr fx, Varptr fy, Varptr fz)
+	End Method
+	
 	' internal
 	Function _forceAndTorqueCallback(bodyPtr:Byte Ptr, timestamp:Float, threadIndex:Int)
 		Local body:TNBody = NewtonBodyGetUserData(bodyPtr)
@@ -599,6 +656,196 @@ Type TNBody
 		If bodyPtr Then
 			NewtonDestroyBody(bodyPtr)
 			bodyPtr = Null
+		End If
+	End Method
+
+End Type
+
+Rem
+bbdoc: 
+End Rem
+Type TNMesh
+
+	Field meshPtr:Byte Ptr
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method ApplyTransform(matrix:TNMatrix)
+		NewtonMeshApplyTransform(meshPtr, Varptr matrix.frontX)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method CalculateOOBB(matrix:TNMatrix, x:Float Var, y:Float Var, z:Float Var)
+		NewtonMeshCalculateOOBB(meshPtr, Varptr matrix.frontX, Varptr x, Varptr y, Varptr z)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method CalculateVertexNormals(angle:Float)
+		NewtonMeshCalculateVertexNormals(meshPtr, angle * 0.01745329252)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method ApplySphericalMapping(material:Int)
+		NewtonMeshApplySphericalMapping(meshPtr, material)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method ApplyCylindricalMapping(cylinderMaterial:Int, capMaterial:Int)
+		NewtonMeshApplyCylindricalMapping(meshPtr, cylinderMaterial, capMaterial)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method ApplyBoxMapping(front:Int, side:Int, top:Int)
+		NewtonMeshApplyBoxMapping(meshPtr, front, side, top)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method IsOpenMesh:Int()
+		Return NewtonMeshIsOpenMesh(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method FixTJoints()
+		NewtonMeshFixTJoints(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method Polygonize()
+		NewtonMeshPolygonize(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method Triangulate()
+		NewtonMeshTriangulate(meshPtr)
+	End Method
+	
+	
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method BeginFace()
+		NewtonMeshBeginFace(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method AddFace(vertexCount:Int, vertex:Float Ptr, strideInBytes:Int, materialIndex:Int)
+		NewtonMeshAddFace(meshPtr, vertexCount, vertex, strideInBytes, materialIndex)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method EndFace()
+		NewtonMeshEndFace(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetTotalFaceCount:Int()
+		Return NewtonMeshGetTotalFaceCount(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetTotalIndexCount:Int()
+		Return NewtonMeshGetTotalIndexCount(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetPointCount:Int()
+		Return NewtonMeshGetPointCount(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetPointStrideInByte:Int()
+		Return NewtonMeshGetPointStrideInByte(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetPointArray:Double Ptr()
+		Return NewtonMeshGetPointArray(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetNormalArray:Double Ptr()
+		Return NewtonMeshGetNormalArray(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetUV0Array:Double Ptr()
+		Return NewtonMeshGetUV0Array(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetUV1Array:Double Ptr()
+		Return NewtonMeshGetUV1Array(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetVertexCount:Int()
+		Return NewtonMeshGetVertexCount(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method GetVertexStrideInByte:Int()
+		Return NewtonMeshGetVertexStrideInByte(meshPtr)
+	End Method
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method MeshGetVertexArray:Double Ptr()
+		Return NewtonMeshGetVertexArray(meshPtr)
+	End Method
+	
+	
+	Rem
+	bbdoc: 
+	End Rem
+	Method Destroy()
+		If meshPtr Then
+			NewtonMeshDestroy(meshPtr)
+			meshPtr = Null
 		End If
 	End Method
 

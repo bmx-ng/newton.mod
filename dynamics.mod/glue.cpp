@@ -46,6 +46,9 @@ extern "C" {
 	void bmx_newtondynamics_NewtonBodyGetTorqueAcc(const NewtonBody* const, float *, float *, float *);
 	void bmx_newtondynamics_NewtonBodyGetCentreOfMass(const NewtonBody* const, float *, float *, float *);
 	void bmx_newtondynamics_NewtonBodyGetAABB(const NewtonBody* const, float *, float *, float *, float *, float *, float *);
+	void bmx_newtondynamics_NewtonBodyAddForce(const NewtonBody* const, float, float, float);
+	void bmx_newtondynamics_NewtonBodyAddTorque(const NewtonBody* const, float, float, float);
+	void bmx_newtondynamics_NewtonBodyCalculateInverseDynamicsForce(const NewtonBody* const, float, float, float, float, float *, float *, float *);
 
 	void bmx_newtondynamics_config_body(BBObject *, NewtonBody *);
 	void bmx_newtondynamics_body_destroycallback(const NewtonBody* const);
@@ -227,6 +230,25 @@ void bmx_newtondynamics_NewtonBodyGetAABB(const NewtonBody* const body, float * 
 	*p1x = v1.m_x;
 	*p1y = v1.m_y;
 	*p1z = v1.m_z;
+}
+
+void bmx_newtondynamics_NewtonBodyAddForce(const NewtonBody* const body, float x, float y, float z) {
+	dVector v(x, y, z, 0.0f);
+	NewtonBodyAddForce(body, &v[0]);
+}
+
+void bmx_newtondynamics_NewtonBodyAddTorque(const NewtonBody* const body, float x, float y, float z) {
+	dVector v(x, y, z, 0.0f);
+	NewtonBodyAddTorque(body, &v[0]);
+}
+
+void bmx_newtondynamics_NewtonBodyCalculateInverseDynamicsForce(const NewtonBody* const body, float timestep, float x, float y, float z, float * fx, float * fy, float * fz) {
+	dVector v(x, y, z, 0.0f);
+	dVector f;
+	NewtonBodyCalculateInverseDynamicsForce(body, timestep, &v[0], &f[0]);
+	*fx = f.m_x;
+	*fy = f.m_y;
+	*fz = f.m_z;
 }
 
 // ********************************************************
