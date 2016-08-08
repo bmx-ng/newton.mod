@@ -23,7 +23,6 @@
 #include "dgThread.h"
 
 
-
 dgThread::dgThread ()
 	:m_id(0)
 	,m_terminate(0)
@@ -119,6 +118,10 @@ void* dgThread::dgThreadSystemCallback(void* threadData)
 
 #else  
 
+#ifdef BMX_NG
+#define GC_THREADS
+#include "brl.mod/blitz.mod/bdwgc/include/gc.h"
+#endif
 
 #if defined (_MACOSX_VER) || defined (IOS) || defined (__APPLE__)
 	#define DG_SEMAPHORE_NAME "/semaphore"
@@ -240,11 +243,22 @@ void* dgThread::dgThreadSystemCallback(void* threadData)
 	dgFloatExceptions exception;
 	dgSetPrecisionDouble precision;
 
+#ifdef BMX_NG
+	struct GC_stack_base base;
+	GC_get_stack_base(&base);
+	GC_register_my_thread(&base);
+#endif
+
 	dgThread* const me = (dgThread*) threadData;
 	dgInterlockedExchange(&me->m_threadRunning, 1);
 	me->Execute(me->m_id);
 	dgInterlockedExchange(&me->m_threadRunning, 0);
 	dgThreadYield();
+
+#ifdef BMX_NG
+	GC_unregister_my_thread();
+#endif
+
 	return 0;
 }
 
