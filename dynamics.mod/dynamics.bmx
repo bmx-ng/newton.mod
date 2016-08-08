@@ -488,9 +488,9 @@ Type TNBody
 	End Method
 	
 	Rem
-	bbdoc: Gets the linear viscous damping of the body.
+	bbdoc: Gets the angular viscous damping of the body.
 	End Rem
-	Method GetAngularDampling(aX:Float Var, aY:Float Var, aZ:Float Var)
+	Method GetAngularDamping(aX:Float Var, aY:Float Var, aZ:Float Var)
 		bmx_newtondynamics_NewtonBodyGetAngularDamping(bodyPtr, Varptr aX, Varptr aY, Varptr aZ)
 	End Method
 
@@ -502,11 +502,17 @@ Type TNBody
 	End Method
 	
 	Rem
-	bbdoc: Sets the linear viscous damping of the body.
+	bbdoc: Applies the angular viscous damping coefficient to the body.
 	about: The default value of *angularDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
 	There is a non zero implicit attenuation value of 0.0001 assumed by the integrator.
+	The dampening viscous friction torque is added to the external torque applied to the body every frame before going to the solver-integrator. 
+	This torque is proportional to the square of the magnitude of the angular velocity to the body in the opposite direction of the angular velocity of the body. 
+	An application can set *angularDamp* to zero when the to take control of the external forces and torque applied to the body, should the application
+	desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient be set to a non-zero 
+	value for the majority of background bodies. This saves the application from needing to control these forces and also prevents the integrator from
+	adding very large velocities to a body.
 	End Rem
-	Method SetAngularDampling(aX:Float, aY:Float, aZ:Float)
+	Method SetAngularDamping(aX:Float, aY:Float, aZ:Float)
 		bmx_newtondynamics_NewtonBodySetAngularDamping(bodyPtr, aX, aY, aZ)
 	End Method
 
